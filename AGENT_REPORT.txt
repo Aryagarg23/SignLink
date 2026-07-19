@@ -1,0 +1,5 @@
+DONE
+Replaced the two fake-measurement charts (joint_angle_heatmap.png, letter_accuracy.png) with one explanatory diagram, recognition_flow.png: camera frame -> MediaPipe's real 21-landmark topology -> joint angles via vector algebra (same arccos formula as app.html's angle()) -> hand-coded letter-table match -> matched letter -> caption in the call, computed on a stated toy "L" pose via real forward kinematics, tagged "mechanism as built".
+prototype/figures/ is now gitignored; old PNGs are git rm --cached'd and deleted from disk, new PNG confirmed present on disk only (git status shows it untracked/ignored, git ls-files shows no prototype PNGs left tracked).
+README's Prototype section rewritten to describe the diagram and its honesty framing (no invented metrics, static poses only, J/Z out of scope) and now embeds the hosted copy at the Supabase media URL for SignLink instead of a repo-relative path, with the regenerate command kept.
+Not yet done: staging/committing these changes (deletions, .gitignore, README, script, AGENT_REPORT.txt) — left for the user to review and commit.

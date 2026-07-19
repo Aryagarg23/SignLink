@@ -1,48 +1,82 @@
 # SignLink
 
-# Inspiration
-We were inspired by the lack of accessibility features for the deaf/heard of hearing community to communicate with a hearing person who doesn't know ASL without an interpreter. We have a passion for technology which combines accessibility, so I decided to build this project as a way to challenge myself and expand my knowledge.
+Video calls with real-time ASL fingerspelling to text.
 
-# What it does
-As the world becomes more diverse and inclusive, the need for effective communication with individuals who are deaf or hard of hearing is becoming increasingly important. Recognising this need, we developed our in-house video conferencing app that includes a feature to help bridge the communication gap: an American Sign Language (ASL) to text translator.
+Built in 36-ish hours at BoilerMake X (Purdue), January 2023.
 
-Currently, our app uses a pre-defined dictionary to translate ASL signs into text in real-time. While this feature is useful, we understand that machine learning can provide a more accurate and efficient solution. That's why we are actively researching and developing a machine learning-based ASL to text translator, which will improve the accuracy and speed of the translation process.
+## What it does
 
-Our app also includes other features such as high-quality video and audio, and the ability to connect with different devices, making it perfect for everyday use.
+SignLink is a video conferencing app built for calls between a deaf or hard-of-hearing
+person and someone who doesn't know ASL. One participant fingerspells; the other side of
+the call sees the letters as text overlaid on the video, no interpreter required.
 
-In conclusion, our in-house video conferencing app is a powerful tool that promotes effective communication, inclusion, and accessibility for individuals who are deaf or hard of hearing. Its current ASL to text translator feature is a step towards a more accurate and efficient solution in the future, making it more inclusive and convenient for all users.
+The translation is letter-by-letter, not sentence-level. It reads hand shape from a
+fixed set of geometric rules, not a trained model. We're calling that out directly
+instead of dressing it up: it's a foundational piece, not a finished translator.
 
-# How we built it
-We built our in-house video conferencing application using a combination of HTML, JavaScript, WebRTC, and CSS for the front-end and OpenCV, MediaPipes for the ASL-text feature.
+## How it works
 
-To create the video conferencing platform, we used HTML and PeerJS to handle the real-time communication between users, and WebRTC for the video and audio streaming. We also used CSS to create a visually appealing and user-friendly interface.
+- WebRTC video call, negotiated with PeerJS — one peer creates a room, shares the room
+  ID, the other joins.
+- MediaPipe Hands runs on the remote video stream in the browser and returns 21 hand
+  landmarks per frame.
+- Landmarks get re-centered on the wrist (landmark 0), then vector algebra and
+  trigonometry turn triples of landmarks into joint angles, summed per finger (thumb,
+  index, middle, ring, pinky).
+- Those five angle sums (plus an index-to-middle fingertip distance, for telling V from
+  U and K from H) get checked against a hand-coded if/else tree in `app.html` that maps
+  shapes to letters.
+- The matched letter is drawn straight onto a canvas over the remote video feed.
 
-For the ASL to text feature, we used OpenCV to capture and process the video, and MediaPipes to analyse the movement of the hand. We then used vector algebra and trigonometry to find the relative angles of all the joints, and created a database of all the ASL letters to reference in real-time.
+Tech: HTML5/CSS/JS, WebRTC, PeerJS, MediaPipe, OpenCV.
 
-To recognise the ASL letters, we hardcoded a language processing model using 20 nodes placed at strategic points on the hand. This allowed us to accurately recognise the ASL letters in real-time and display them on the screen for hearing users to understand.
+## Prototype
 
-The whole process was done in real-time to ensure seamless communication between users. Overall, the combination of these technologies allowed us to create a powerful and efficient in-house video conferencing application that promotes communication, inclusion and accessibility for individuals who are deaf or hard of hearing.
+The real matcher is a hand-coded threshold tree tuned by eye during the hackathon —
+there's no dataset or accuracy number behind it, so there's nothing to chart. Instead
+`prototype/asl_prototype.py` draws the recognition pipeline itself: camera frame ->
+MediaPipe's 21 hand landmarks -> joint angles via vector algebra -> match against the
+hand-coded letter table -> letter -> caption in the call. The landmark topology and
+the angle formula are real (the same `angle()` math as `app.html`), applied to one
+stated toy pose (a static "L" handshape) to show the mechanism, not a measurement.
+Static poses only — motion letters J and Z need a trajectory across frames and are
+out of scope for this pipeline.
 
-# Challenges we ran into
-Our initial goal for this project was to build an AI-based American Sign Language (ASL) to text converter using Tensorflow. However, we encountered several challenges that hindered our progress.
+Regenerate it locally:
 
-One of the major challenges was poorly documented tutorials that led to many dead ends. We spent countless hours trying to navigate through the use of various libraries, only to find that some of them were poorly coded or not compatible with our setup. To further complicate matters, one of the required modules needed a windows C++ standalone builder, which proved to be a roadblock as it was broken even through the Microsoft store. Despite our persistence, we were unable to get the AI-based converter to work, and had to abandon the idea of using Tensorflow altogether.
+```
+MPLCONFIGDIR=/home/arya/projects/hackathons/.mplcache \
+  /home/arya/projects/hackathons/.venv/bin/python prototype/asl_prototype.py
+```
 
-Another challenge we faced was the lack of support for our desired feature set in the available libraries for building a standalone video conference application. We had planned to use the Zoom SDK to create a full-blown video conference application that would output the video of the meeting participants and also broadcast the text generated by the converting application. Unfortunately, none of the libraries offered online could support this feature set, which forced us to rethink our approach and pivot the entire base of our project.
+![SignLink recognition pipeline: camera frame to on-screen letter](https://vircgxpcwyvniemqmdyi.supabase.co/storage/v1/object/public/media/writing/SignLink/recognition_flow.png)
 
-In the end, we were able to overcome these challenges by changing our approach and adopting new technologies. While it was disappointing to have to abandon our original plans, it ultimately led us to create a more innovative and effective solution.
+## Team
 
-# Accomplishments that we're proud of
-Developing a video conferencing app that can convert American Sign Language to English captions is no small feat, and the fact that some of the signs were successfully translated is a great indication of the hard work and dedication put in by our team. The use of technology to bridge the communication gap between individuals who use American Sign Language and those who don't is an important step towards inclusivity and accessibility. Our team was able to make this leap, especially given the complexity of hand angles recognition and translation, it's a big step forward. We are proud of what we accomplished in such a short time!
+Arya Garg, [Reeve Prinson Fernandes](https://github.com/ReeveFernandes), [Arleen Monteiro](https://www.linkedin.com/in/arleen-monteiro-665481258/).
 
-# What we learned
-We have acquired knowledge and skills in utilising various technologies and tools to develop a video conferencing solution that incorporates gesture recognition functionality. Specifically, We have gained proficiency in utilising PeerJs for establishing video conferencing connections, utilising MediaPipes and OpenCV for real-time editing of remote video, and utilising TensorFlow for the training and implementation of a machine learning model for gesture recognition. Furthermore, We have gained insight into the challenges that may arise during the training and implementation of machine learning models.
+This repo is a copy of the team's original repo, kept with its original commit
+history: Reeve built the video-calling and MediaPipe gesture-matching pipeline;
+Arleen built the landing page and styling. I was the third person on the team —
+my contribution isn't visible in this repo's git history, so I'm crediting the code
+to the people who actually wrote it rather than claiming lines that aren't mine.
+Originally hacked together in [ReeveFernandes/SignLink](https://github.com/ReeveFernandes/SignLink).
 
-# What's next for SignLink
-Potential future developments for this concept could include the creation of a mobile application to enhance accessibility and improve the accuracy of sign language translation. The current implementation utilizes letter-to-letter translation, however, incorporating advanced machine learning techniques would allow for recognition of compounded expressions, movement, and sign language, resulting in a more effective and holistic form of communication. The inclusion of live captioning and transcription functionality would also be beneficial. Furthermore, implementing support for multiple languages would promote inclusivity and cater to a diverse range of users.
+## Links
 
-# Try it out
-1. Use this link : https://comforting-choux-7538b6.netlify.app/
-2. Click on 'Try it'
-3. Create a new room.
-4. Share the unique ID to the other participant to 'join' the vedio call.
+- Devpost project: https://devpost.com/software/signlink
+- Writeup: https://aryagarg23.com/writing/signlink
+- Site: https://aryagarg23.com
+- Devpost profile: https://devpost.com/Aryagarg23
+
+## More hackathon builds
+
+- [Gyrus](https://github.com/Aryagarg23/Gyrus) — agentic browser that supports curiosity instead of replacing it (WeaveHacks 2025)
+- [WhiteBox](https://github.com/Aryagarg23/WhiteBox) — traceable GraphRAG over medical literature (Future of Data 2024, 1st place)
+- [G-Code-Assembler](https://github.com/Aryagarg23/G-Code-Assembler) — G-code assembly + STL visualization (MakeUC 2024, Kinetic Vision winner)
+- [Terminally-Addicted](https://github.com/Aryagarg23/Terminally-Addicted) — Spotify, GitHub, GPT and YouTube without leaving the terminal (HackOHI/O 2024)
+- [Memento](https://github.com/Aryagarg23/Memento) — digital memory journal for Alzheimer's patients and caregivers (RevolutionUC 2024, 3rd overall)
+- [Buycott](https://github.com/Aryagarg23/Buycott) — barcode scan -> parent company -> NLP stance on social issues (MakeUC 2023, 1st overall)
+- [Kuka Arm Viz](https://github.com/Aryagarg23/Visualizing-Kuka-7-Node-Robot-Arm) — interactive 7-DOF robot arm in WebGL with inverse kinematics (RevolutionUC 2023)
+- [Hi-Five](https://github.com/Aryagarg23/Hi-Five) — anonymous friend-matching on OCEAN personality vectors (SASEhack 2024)
+- [Friction](https://github.com/Aryagarg23/Friction) — speculative OS + hardware that protects flow state with physical friction (Fig Build 2026)
