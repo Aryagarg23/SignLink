@@ -30,6 +30,20 @@ instead of dressing it up: it's a foundational piece, not a finished translator.
 
 Tech: HTML5/CSS/JS, WebRTC, PeerJS, MediaPipe, OpenCV.
 
+## Try it locally
+
+Serve the repository from its root (the camera API needs a secure context; `localhost`
+counts) and open the landing page:
+
+```sh
+python3 -m http.server 8000
+```
+
+Then visit <http://localhost:8000/>. Open the app in two browser windows to try the
+room flow. Allow camera and microphone access. The app loads MediaPipe and PeerJS from
+public CDNs, so those services and an internet connection are required; this is a
+hackathon prototype rather than a hosted calling service.
+
 ## Prototype
 
 The real matcher is a hand-coded threshold tree tuned by eye during the hackathon —
@@ -42,11 +56,11 @@ stated toy pose (a static "L" handshape) to show the mechanism, not a measuremen
 Static poses only — motion letters J and Z need a trajectory across frames and are
 out of scope for this pipeline.
 
-Regenerate it locally:
+Regenerate it locally (Python 3 with Matplotlib and NumPy):
 
 ```
-MPLCONFIGDIR=/home/arya/projects/hackathons/.mplcache \
-  /home/arya/projects/hackathons/.venv/bin/python prototype/asl_prototype.py
+python3 -m pip install matplotlib numpy
+python3 prototype/asl_prototype.py
 ```
 
 ![SignLink recognition pipeline: camera frame to on-screen letter](https://vircgxpcwyvniemqmdyi.supabase.co/storage/v1/object/public/media/writing/SignLink/recognition_flow.png)

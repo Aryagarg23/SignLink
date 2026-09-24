@@ -11,8 +11,8 @@ itself (a static "L" shape) and its joint coordinates are computed with the same
 forward-kinematics + vector-angle math app.html uses (see `angle()` in app.html),
 applied to a stated toy pose — real math, not a measurement.
 
-Run: MPLCONFIGDIR=/home/arya/projects/hackathons/.mplcache \
-     /home/arya/projects/hackathons/.venv/bin/python prototype/asl_prototype.py
+Run: python3 -m pip install matplotlib numpy
+     python3 prototype/asl_prototype.py
 """
 import os
 
@@ -22,8 +22,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Arc, FancyArrowPatch, Rectangle
-
-plt.style.use("/home/arya/projects/hackathons/.style/garg-paper.mplstyle")
 
 FIGDIR = os.path.join(os.path.dirname(__file__), "figures")
 os.makedirs(FIGDIR, exist_ok=True)
